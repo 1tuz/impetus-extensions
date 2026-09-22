@@ -1,0 +1,20 @@
+id = "browser"
+version = "0.1.0"
+kind = "mcp_config"
+display_name = "Browser"
+description = "Browser Provider Protocol 0.1 MCP server (mock-first; optional CDP via BROWSER_BIN)"
+permissions = ["network"]
+permission_rationale = [
+  { permission = "network", reason = "Navigate and fetch rendered page content over the network only. No filesystem.write, secrets, or arbitrary process.shell. Optional Chromium launch uses allowlisted BROWSER_BIN only (process.spawn-equivalent); keep MCP env_keys minimal." },
+]
+
+[compatibility]
+extension_api_version = "0.1.0-skill-mcp"
+impetus_tag = "v0.1.2"
+extension_schema = "impetus.extension.v1@1"
+mcp_schema = "impetus.mcp.v1@1"
+browser_protocol = "0.1"
+
+[entrypoints]
+mcp_json = "mcp.json"
+binary = "impetus-ext-browser"

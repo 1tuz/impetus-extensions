@@ -1,0 +1,13 @@
+{
+  "name": "browser",
+  "command": "impetus-ext-browser",
+  "args": ["--mock"],
+  "env": {},
+  "transport": "stdio",
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  }
+}

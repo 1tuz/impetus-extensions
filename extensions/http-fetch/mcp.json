@@ -1,0 +1,13 @@
+{
+  "name": "impetus-ext-http-fetch",
+  "command": "impetus-ext-http-fetch",
+  "args": [],
+  "env": {},
+  "transport": "stdio",
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  }
+}

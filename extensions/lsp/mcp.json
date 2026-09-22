@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "lsp",
+  "transport": "stdio",
+  "command": "impetus-ext-lsp",
+  "args": [],
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  },
+  "env_keys": [
+    "IMPETUS_LSP_COMMAND",
+    "IMPETUS_LSP_ARGS",
+    "IMPETUS_LSP_WORKSPACE",
+    "PATH",
+    "HOME"
+  ]
+}

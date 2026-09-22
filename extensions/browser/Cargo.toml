@@ -1,0 +1,39 @@
+[package]
+name = "impetus-ext-browser"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "First-party Impetus Browser provider MCP extension (protocol 0.1)"
+repository.workspace = true
+readme = "README.md"
+
+[[bin]]
+name = "impetus-ext-browser"
+path = "src/main.rs"
+
+[lib]
+name = "impetus_ext_browser"
+path = "src/lib.rs"
+
+[features]
+default = []
+# Optional Chromium CDP backend via chromiumoxide. Heavy; keep off for CI.
+cdp = ["dep:chromiumoxide"]
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+impetus-ext-mcp.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-util = { version = "0.7.16", features = ["rt"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chromiumoxide = { version = "0.7.0", optional = true, default-features = false, features = ["tokio-runtime"] }
+
+[dev-dependencies]
+impetus-ext-support.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+serde_json.workspace = true

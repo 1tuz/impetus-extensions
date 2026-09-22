@@ -1,0 +1,16 @@
+{
+  "name": "impetus-ext-git-tools",
+  "command": "impetus-ext-git-tools",
+  "args": [],
+  "env": {
+    "IMPETUS_WORKSPACE_ROOT": "",
+    "GIT_BINARY": ""
+  },
+  "transport": "stdio",
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  }
+}

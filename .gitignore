@@ -1,0 +1,27 @@
+# Generated / local
+/target/
+/dist/
+**/*.rs.bk
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Impetus local install state (never commit)
+.impetus/
+*.db
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Coverage / profiles
+*.profraw
+*.profdata
+/coverage/
+
+# Packaged binaries accidentally copied into extension sources
+extensions/*/bin/

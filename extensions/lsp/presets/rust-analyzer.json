@@ -1,0 +1,28 @@
+{
+  "id": "rust-analyzer",
+  "display_name": "rust-analyzer",
+  "description": "Reference preset for the generic impetus-ext-lsp MCP server. Not a separate binary.",
+  "command": "rust-analyzer",
+  "args": [],
+  "env": {
+    "IMPETUS_LSP_COMMAND": "rust-analyzer",
+    "IMPETUS_LSP_ARGS": "[]"
+  },
+  "notes": [
+    "Install rust-analyzer on PATH (rustup component add rust-analyzer).",
+    "Set IMPETUS_LSP_WORKSPACE to the Cargo workspace root, or pass workspace to lsp_start.",
+    "Start MCP with: impetus-ext-lsp (no --mock).",
+    "Then call lsp_start with command=rust-analyzer and workspace=<root>, or rely on env defaults.",
+    "Architecture remains generic — swap command for clangd, gopls, pyright, etc."
+  ],
+  "suggested_mcp_args": [],
+  "tools_flow": [
+    "lsp_start",
+    "lsp_diagnostics",
+    "lsp_hover",
+    "lsp_definition",
+    "lsp_references",
+    "lsp_symbols",
+    "lsp_stop"
+  ]
+}

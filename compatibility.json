@@ -1,0 +1,18 @@
+{
+  "impetus_tag": "v0.1.2",
+  "impetus_repository": "https://github.com/1tuz/impetus",
+  "extension_api_version": "0.1.0-skill-mcp",
+  "extension_api_version_note": "Impetus core does not yet expose extension_api_version. This repo uses a documented stand-in covering impetus.extension.v1@1 + impetus.mcp.v1@1 + browser protocol 0.1.",
+  "schemas": {
+    "extension": "impetus.extension.v1@1",
+    "mcp": "impetus.mcp.v1@1",
+    "browser_provider_protocol": "0.1"
+  },
+  "supported_install_kinds": ["skill", "mcp_config"],
+  "unsupported_until_core_unblocks": [
+    "dynamic_browser_provider_registration",
+    "dynamic_coding_tools_provider_registration",
+    "memory_provider",
+    "native_module_marketplace"
+  ]
+}

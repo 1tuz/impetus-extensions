@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+        with:
+          components: rustfmt
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo clippy -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  build:
+    name: build
+    needs: [format, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo build --workspace
+        run: cargo build --workspace --all-targets
+
+  unit-tests:
+    name: unit-tests
+    needs: [format, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo test --workspace
+        run: cargo test --workspace --all-targets
+
+  manifest-validation:
+    name: manifest-validation
+    needs: [format, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - uses: Swatinem/rust-cache@v2
+      - name: validate-manifests
+        run: cargo run -p impetus-ext-support -- validate-manifests --root .
+
+  compat:
+    name: compat
+    needs: [format, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Assert compatibility.json extension_api pin
+        run: |
+          set -euo pipefail
+          test -f compatibility.json
+          jq -e '
+            .impetus_tag
+            and .extension_api_version
+            and .schemas.extension
+            and .schemas.mcp
+          ' compatibility.json > /dev/null
+          echo "compatibility.json OK:"
+          jq '{impetus_tag, extension_api_version, schemas}' compatibility.json
+      - name: check-compat (extension_api via compatibility.json)
+        run: cargo run -p impetus-ext-support -- check-compat --root .
+
+  security:
+    name: security
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.98.0
+      - uses: Swatinem/rust-cache@v2
+      # Lightweight gate: clippy (-D warnings) already ran.
+      # Skip cargo-deny / cargo-audit / cargo tree -d to keep CI fast.
+      - name: Workspace dependency tree (informational)
+        run: cargo tree --workspace --edges normal --depth 1
+
+  # Always-runnable MCP mock stdio path (no impetus CLI, Chrome, or rust-analyzer).
+  integration-mocks:
+    name: integration-mocks
+    needs: [format, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.98.0"
+      - uses: Swatinem/rust-cache@v2
+      - name: MCP browser mock (stdio JSON-RPC)
+        run: bash tests/integration/test_mcp_browser_mock.sh
+      - name: MCP lsp mock (stdio JSON-RPC)
+        run: bash tests/integration/test_mcp_lsp_mock.sh
+      - name: Hello skill packaging (no impetus required)
+        run: bash tests/integration/test_hello_skill.sh

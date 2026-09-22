@@ -1,0 +1,32 @@
+id = "lsp"
+version = "0.1.0"
+kind = "mcp_config"
+display_name = "LSP"
+description = "Generic language-server MCP proxy (stdio JSON-RPC). Language-agnostic; rust-analyzer is a preset only."
+permissions = ["process_spawn", "filesystem_read", "mcp", "lsp"]
+
+[[permission_rationale]]
+permission = "process_spawn"
+reason = "Spawn only the configured language server binary (command from tool/env). No arbitrary shell."
+
+[[permission_rationale]]
+permission = "filesystem_read"
+reason = "Read workspace files so the language server and diagnostics tools can operate."
+
+[[permission_rationale]]
+permission = "mcp"
+reason = "Installed as an MCP stdio server exposing LSP tools to Impetus."
+
+[[permission_rationale]]
+permission = "lsp"
+reason = "Provides language-server session tools (hover, definition, references, symbols, diagnostics)."
+
+[compatibility]
+extension_api_version = "0.1.0-skill-mcp"
+impetus_tag = "v0.1.2"
+extension_schema = "impetus.extension.v1@1"
+mcp_schema = "impetus.mcp.v1@1"
+
+[entrypoints]
+mcp_json = "mcp.json"
+binary = "impetus-ext-lsp"

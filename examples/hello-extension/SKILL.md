@@ -1,0 +1,1 @@
+../../extensions/hello-extension/SKILL.md

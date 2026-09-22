@@ -1,0 +1,16 @@
+id = "hello-extension"
+version = "0.1.0"
+kind = "skill"
+display_name = "Hello Extension"
+description = "Canonical tutorial skill: initialize, capabilities, packaging"
+permissions = []
+permission_rationale = []
+
+[compatibility]
+extension_api_version = "0.1.0-skill-mcp"
+impetus_tag = "v0.1.2"
+extension_schema = "impetus.extension.v1@1"
+mcp_schema = "impetus.mcp.v1@1"
+
+[entrypoints]
+skill_md = "SKILL.md"

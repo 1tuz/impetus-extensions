@@ -1,0 +1,15 @@
+{
+  "name": "impetus-ext-code-search",
+  "command": "impetus-ext-code-search",
+  "args": [],
+  "env": {
+    "IMPETUS_WORKSPACE_ROOT": ""
+  },
+  "transport": "stdio",
+  "capabilities": {
+    "tools": true,
+    "resources": false,
+    "prompts": false,
+    "sampling": false
+  }
+}
