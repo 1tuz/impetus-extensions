@@ -16,9 +16,11 @@ async fn mock_session_initialize_diagnostics_and_hover() {
         .expect("start mock");
     assert_eq!(started["started"], true);
     assert_eq!(started["mock"], true);
-    assert!(started["initialize"]["capabilities"]["hoverProvider"]
-        .as_bool()
-        .unwrap_or(false));
+    assert!(
+        started["initialize"]["capabilities"]["hoverProvider"]
+            .as_bool()
+            .unwrap_or(false)
+    );
 
     let diags = session.diagnostics(None).await.expect("diags");
     let map = diags["diagnostics"].as_object().expect("diag map");
@@ -108,14 +110,11 @@ fn parse_args_json_and_whitespace() {
 #[test]
 fn package_meta_and_mcp_json_shape() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let meta = impetus_ext_support::load_package_meta(&root.join("package.toml"))
-        .expect("package.toml");
+    let meta =
+        impetus_ext_support::load_package_meta(&root.join("package.toml")).expect("package.toml");
     assert_eq!(meta.id, "lsp");
     assert_eq!(meta.compatibility.impetus_tag, "v0.1.2");
-    assert_eq!(
-        meta.compatibility.extension_api_version,
-        "0.1.0-skill-mcp"
-    );
+    assert_eq!(meta.compatibility.extension_api_version, "0.1.0-skill-mcp");
     assert!(!meta.permissions.contains(&"network".to_string()));
     assert!(!meta.permissions.contains(&"secrets_provider".to_string()));
     assert!(meta.permissions.contains(&"process_spawn".to_string()));

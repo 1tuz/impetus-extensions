@@ -2,17 +2,17 @@
 
 use crate::allowlist::is_allowed_request;
 use crate::framing::{read_message, write_message};
-use anyhow::{anyhow, bail, Context, Result};
-use serde_json::{json, Value};
+use anyhow::{Context, Result, anyhow, bail};
+use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use tokio::io::{AsyncWrite, BufReader};
 use tokio::process::{Child, Command};
-use tokio::sync::{oneshot, Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, oneshot};
 use tokio::task::JoinHandle;
 use tokio::time::timeout;
 
@@ -172,9 +172,9 @@ impl LspSession {
             })
         };
         let _ = self.stop().await?;
-        let cfg = cfg.or(snapshot).ok_or_else(|| {
-            anyhow!("lsp_restart: no prior session and no start config provided")
-        })?;
+        let cfg = cfg
+            .or(snapshot)
+            .ok_or_else(|| anyhow!("lsp_restart: no prior session and no start config provided"))?;
         self.start(cfg).await
     }
 
@@ -576,7 +576,8 @@ where
                     )
                     .await?;
                 }
-                "textDocument/definition" | "textDocument/typeDefinition"
+                "textDocument/definition"
+                | "textDocument/typeDefinition"
                 | "textDocument/implementation" => {
                     respond(
                         &mut stdout,

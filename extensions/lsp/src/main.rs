@@ -1,6 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
-use impetus_ext_lsp::session::{run_mock_child, LspSession};
+use impetus_ext_lsp::session::{LspSession, run_mock_child};
 use impetus_ext_lsp::{build_server, defaults_from_env, parse_args_list};
 use std::path::PathBuf;
 use std::sync::Arc;

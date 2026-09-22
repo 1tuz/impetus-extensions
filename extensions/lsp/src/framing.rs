@@ -1,6 +1,6 @@
 //! LSP stdio framing: `Content-Length: N\r\n\r\n` + JSON body.
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use serde_json::Value;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 

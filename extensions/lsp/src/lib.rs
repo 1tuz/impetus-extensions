@@ -11,9 +11,9 @@ pub mod allowlist;
 pub mod framing;
 pub mod session;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use impetus_ext_mcp::{BoxFuture, MapHandler, McpServer, ServerInfo, ToolDef, ToolResult};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use session::{LspSession, StartConfig};
 use std::path::PathBuf;
 use std::sync::Arc;
