@@ -156,6 +156,18 @@ impl BackendError {
     }
 }
 
+/// Reject non-http(s) URLs (file://, javascript:, etc.).
+fn require_http_url(url: &str) -> Result<(), BackendError> {
+    let trimmed = url.trim();
+    if trimmed.starts_with("https://") || trimmed.starts_with("http://") {
+        Ok(())
+    } else {
+        Err(BackendError::msg(
+            "only http(s) URLs are allowed (file:// and other schemes blocked)",
+        ))
+    }
+}
+
 struct SessionState {
     cancel: CancellationToken,
     page_counter: u64,
@@ -299,6 +311,7 @@ impl MockBackend {
         &self,
         request: BrowserNavigateRequest,
     ) -> Result<BrowserNavigateResult, BackendError> {
+        require_http_url(&request.url)?;
         let mut sessions = self.sessions.lock().await;
         let state = sessions.get_mut(&request.session_id).ok_or_else(|| {
             BackendError::msg(format!("unknown browser session: {}", request.session_id))
@@ -357,6 +370,9 @@ impl MockBackend {
         &self,
         request: BrowserFetchRenderedRequest,
     ) -> Result<BrowserFetchRenderedResult, BackendError> {
+        if let Some(ref url) = request.url {
+            require_http_url(url)?;
+        }
         let sessions = self.sessions.lock().await;
         let state = sessions.get(&request.session_id).ok_or_else(|| {
             BackendError::msg(format!("unknown browser session: {}", request.session_id))
@@ -625,5 +641,33 @@ impl CdpBackend {
             ok: true,
             detail: "cdp cancel no-op".into(),
         })
+    }
+}
+
+#[cfg(test)]
+mod url_guard_tests {
+    use super::*;
+    use crate::protocol::BrowserNavigateRequest;
+
+    #[tokio::test]
+    async fn mock_rejects_file_url() {
+        let backend = MockBackend::new();
+        let session = backend
+            .ensure_session(BrowserSessionEnsureRequest {
+                client_session_id: "c".into(),
+                browser_preference: None,
+            })
+            .await
+            .unwrap();
+        let err = backend
+            .navigate(BrowserNavigateRequest {
+                session_id: session.session_id,
+                url: "file:///etc/passwd".into(),
+                page_id: None,
+                new_page: false,
+            })
+            .await
+            .unwrap_err();
+        assert!(err.to_string().contains("http"));
     }
 }
