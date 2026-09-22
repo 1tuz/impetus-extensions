@@ -1,17 +1,11 @@
 #!/usr/bin/env bash
+# Thin wrapper kept for local smoke; prefer test_mcp_*_mock.sh + mcp_stdio_probe.py.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-BIN="$1"
+BIN_NAME="${1:?bin name}"
 shift || true
-export PATH="$ROOT/target/debug:$PATH"
-if [[ ! -x "$ROOT/target/debug/$BIN" && ! -x "$(command -v "$BIN" || true)" ]]; then
-  cargo build -p "$BIN" -q
-fi
-CMD="$(command -v "$BIN")"
-# Send initialize + tools/list over stdio
-{
-  printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
-  printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
-} | "$CMD" "$@" | head -n 20 | tee /tmp/impetus-ext-mcp-smoke.out
-grep -q '"result"' /tmp/impetus-ext-mcp-smoke.out
-echo "ok mcp smoke $BIN"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Resolve package name: bin names match package names for first-party MCP exts.
+cargo build -q -p "${BIN_NAME}" --bin "${BIN_NAME}"
+BIN="${ROOT}/target/debug/${BIN_NAME}"
+exec python3 "${SCRIPT_DIR}/mcp_stdio_probe.py" -- "${BIN}" "$@"

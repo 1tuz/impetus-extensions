@@ -1,213 +1,72 @@
-//! Generic LSP MCP extension for Impetus.
-
-mod lsp;
-
 use anyhow::Result;
 use clap::Parser;
-use impetus_ext_mcp::{McpServer, ServerInfo, ToolCall, ToolDef, ToolHandler, ToolResult};
-use lsp::{LspSession, MockLsp, ProcessLsp};
-use serde_json::{Value, json};
+use impetus_ext_lsp::session::{run_mock_child, LspSession};
+use impetus_ext_lsp::{build_server, defaults_from_env, parse_args_list};
+use std::path::PathBuf;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 #[derive(Parser, Debug)]
-#[command(name = "impetus-ext-lsp")]
-struct Args {
-    /// Fake LS for CI (default true when flag present; use --no-mock for real process).
-    #[arg(long, default_value_t = true, action = clap::ArgAction::SetTrue)]
+#[command(
+    name = "impetus-ext-lsp",
+    about = "Generic LSP MCP stdio server for Impetus"
+)]
+struct Cli {
+    /// Fake language server (initialize + sample diagnostics). For CI without rust-analyzer.
+    #[arg(long)]
     mock: bool,
-    #[arg(long, overrides_with = "mock")]
-    no_mock: bool,
-}
 
-struct Handler {
-    mock: bool,
-    session: Arc<Mutex<Option<Box<dyn LspSession>>>>,
-}
+    /// Internal: act as the mock language server child (Content-Length stdio).
+    #[arg(long, hide = true)]
+    mock_child: bool,
 
-impl ToolHandler for Handler {
-    fn call<'a>(
-        &'a self,
-        call: ToolCall<'a>,
-    ) -> impetus_ext_mcp::BoxFuture<'a, Result<ToolResult>> {
-        Box::pin(async move {
-            match call.name {
-                "lsp_start" => {
-                    let command = call
-                        .arguments
-                        .get("command")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("rust-analyzer");
-                    let workspace = call
-                        .arguments
-                        .get("workspace")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or(".");
-                    let args: Vec<String> = call
-                        .arguments
-                        .get("args")
-                        .and_then(|v| v.as_array())
-                        .map(|a| {
-                            a.iter()
-                                .filter_map(|v| v.as_str().map(|s| s.to_string()))
-                                .collect()
-                        })
-                        .unwrap_or_default();
-                    let mut slot = self.session.lock().await;
-                    if let Some(existing) = slot.as_mut() {
-                        existing.stop().await.ok();
-                    }
-                    let sess: Box<dyn LspSession> = if self.mock {
-                        Box::new(MockLsp::start(command, args, workspace).await?)
-                    } else {
-                        Box::new(ProcessLsp::start(command, args, workspace).await?)
-                    };
-                    *slot = Some(sess);
-                    ok_json(json!({"started": true, "command": command, "workspace": workspace}))
-                }
-                "lsp_stop" => {
-                    let mut slot = self.session.lock().await;
-                    if let Some(mut s) = slot.take() {
-                        s.stop().await?;
-                    }
-                    ok_json(json!({"stopped": true}))
-                }
-                "lsp_restart" => {
-                    let mut slot = self.session.lock().await;
-                    let Some(s) = slot.as_mut() else {
-                        return Ok(ToolResult::err("no session"));
-                    };
-                    s.restart().await?;
-                    ok_json(json!({"restarted": true}))
-                }
-                "lsp_diagnostics" => {
-                    let uri = call.arguments.get("uri").and_then(|v| v.as_str());
-                    let slot = self.session.lock().await;
-                    let Some(s) = slot.as_ref() else {
-                        return Ok(ToolResult::err("no session"));
-                    };
-                    ok_json(s.diagnostics(uri).await?)
-                }
-                "lsp_request" => {
-                    let method = call
-                        .arguments
-                        .get("method")
-                        .and_then(|v| v.as_str())
-                        .ok_or_else(|| anyhow::anyhow!("missing method"))?;
-                    let params = call
-                        .arguments
-                        .get("params")
-                        .cloned()
-                        .unwrap_or_else(|| json!({}));
-                    let slot = self.session.lock().await;
-                    let Some(s) = slot.as_ref() else {
-                        return Ok(ToolResult::err("no session"));
-                    };
-                    ok_json(s.request(method, params).await?)
-                }
-                "lsp_hover" | "lsp_definition" | "lsp_references" | "lsp_symbols" => {
-                    let slot = self.session.lock().await;
-                    let Some(s) = slot.as_ref() else {
-                        return Ok(ToolResult::err("no session"));
-                    };
-                    ok_json(s.convenience(call.name, call.arguments.clone()).await?)
-                }
-                "lsp_cancel" => {
-                    let slot = self.session.lock().await;
-                    let Some(s) = slot.as_ref() else {
-                        return Ok(ToolResult::err("no session"));
-                    };
-                    s.cancel().await?;
-                    ok_json(json!({"cancelled": true}))
-                }
-                other => Ok(ToolResult::err(format!("unknown tool `{other}`"))),
-            }
-        })
-    }
-}
+    /// Default language server binary (overridden by lsp_start / IMPETUS_LSP_COMMAND).
+    #[arg(long)]
+    command: Option<String>,
 
-fn ok_json(v: Value) -> Result<ToolResult> {
-    Ok(ToolResult::ok(serde_json::to_string_pretty(&v)?))
-}
+    /// Default language server args (JSON array or whitespace-separated).
+    #[arg(long)]
+    args: Option<String>,
 
-fn tools() -> Vec<ToolDef> {
-    let schema = json!({"type":"object"});
-    [
-        "lsp_start",
-        "lsp_stop",
-        "lsp_restart",
-        "lsp_diagnostics",
-        "lsp_request",
-        "lsp_hover",
-        "lsp_definition",
-        "lsp_references",
-        "lsp_symbols",
-        "lsp_cancel",
-    ]
-    .into_iter()
-    .map(|name| ToolDef {
-        name: name.into(),
-        description: name.into(),
-        input_schema: schema.clone(),
-    })
-    .collect()
+    /// Default workspace root.
+    #[arg(long)]
+    workspace: Option<PathBuf>,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
-        .with_env_filter("info")
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("warn")),
+        )
         .with_writer(std::io::stderr)
         .init();
-    let args = Args::parse();
-    let mock = !args.no_mock;
-    let handler = Handler {
-        mock,
-        session: Arc::new(Mutex::new(None)),
-    };
-    McpServer::new(
-        ServerInfo {
-            name: "impetus-ext-lsp".into(),
-            version: env!("CARGO_PKG_VERSION").into(),
-        },
-        tools(),
-        handler,
-    )
-    .serve_stdio()
-    .await
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn mock_diagnostics() {
-        let handler = Handler {
-            mock: true,
-            session: Arc::new(Mutex::new(None)),
-        };
-        handler
-            .call(ToolCall {
-                name: "lsp_start",
-                arguments: json!({"command":"rust-analyzer","workspace":"."}),
+    let cli = Cli::parse();
+    if cli.mock_child {
+        let workspace = cli
+            .workspace
+            .or_else(|| {
+                std::env::var("IMPETUS_LSP_WORKSPACE")
+                    .ok()
+                    .filter(|s| !s.is_empty())
+                    .map(PathBuf::from)
             })
-            .await
-            .unwrap();
-        let diag = handler
-            .call(ToolCall {
-                name: "lsp_diagnostics",
-                arguments: json!({}),
-            })
-            .await
-            .unwrap();
-        assert!(!diag.is_error);
-        handler
-            .call(ToolCall {
-                name: "lsp_stop",
-                arguments: json!({}),
-            })
-            .await
-            .unwrap();
+            .unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")));
+        return run_mock_child(workspace).await;
     }
+
+    let (env_cmd, env_args, env_ws) = defaults_from_env();
+    let command = cli.command.or(env_cmd);
+    let args = cli
+        .args
+        .as_deref()
+        .map(|s| parse_args_list(Some(s)))
+        .filter(|v| !v.is_empty())
+        .unwrap_or(env_args);
+    let workspace = cli.workspace.or(env_ws);
+
+    let session = Arc::new(LspSession::new(cli.mock, command, args, workspace));
+    let server = build_server(session);
+    server.serve_stdio().await
 }

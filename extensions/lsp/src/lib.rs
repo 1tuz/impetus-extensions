@@ -4,6 +4,8 @@
 //! JSON-RPC) and exposes MCP tools. Architecture is language-agnostic;
 //! `presets/rust-analyzer.json` is a reference config only.
 
+#![allow(clippy::collapsible_if)]
+
 pub mod allowlist;
 pub mod framing;
 pub mod session;
