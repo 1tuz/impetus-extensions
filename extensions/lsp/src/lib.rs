@@ -5,6 +5,7 @@
 //! `presets/rust-analyzer.json` is a reference config only.
 
 #![allow(clippy::collapsible_if)]
+#![allow(clippy::while_let_loop)]
 
 pub mod allowlist;
 pub mod framing;
