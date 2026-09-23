@@ -1,22 +1,87 @@
 # Manifest
 
-## Core envelope (`impetus.extension.v1`)
+The canonical authoring manifest is `extension.toml` using the public `impetus.extension_package.v1` contract from `impetus-extension-sdk`.
 
-Documented fields only (Impetus `v0.1.2`):
+## Required fields
 
 | Field | Rule |
-|-------|------|
+|---|---|
 | `schema_version` | `1` |
-| `id` | `^[a-z0-9][a-z0-9_-]{0,63}$`, len ≤ 64 |
-| `kind` | `skill` \| `mcp_config` |
-| `version` | non-empty |
-| `digest` | `sha256:` + 64 lowercase hex |
-| `capabilities` | ≥1 unique tokens `^[a-z][a-z0-9_:-]{0,63}$` |
+| `id` | lowercase Impetus extension id |
+| `name` | human-readable name |
+| `version` | semver |
+| `description` | package description |
+| `author` | package author |
+| `extension_api_version` | API major; currently `1` |
+| `capabilities` | non-empty closed set from the SDK |
+| `permissions` | explicit, default-deny permission list |
+| `entrypoint` | one typed entrypoint |
 
-Unknown critical top-level keys → reject.
+## Entrypoints
 
-## Ecosystem `package.toml`
+### Instruction pack
 
-Not read by `impetus extension install`. Used for packaging, CI, permission rationale, compatibility pins.
+```toml
+schema_version = 1
+id = "example-skill"
+name = "Example Skill"
+version = "0.1.0"
+description = "Portable instructions"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["skill_provider"]
+permissions = []
 
-Do not put undocumented keys into `manifest.json`.
+[entrypoint]
+kind = "instruction_pack"
+root = "skills"
+```
+
+The root is package-relative and must not contain absolute paths or `..`.
+
+### MCP bridge
+
+```toml
+schema_version = 1
+id = "example-tools"
+name = "Example Tools"
+version = "0.1.0"
+description = "Tools exposed through MCP"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "tool"]
+permissions = ["mcp"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "example-tools"
+```
+
+The MCP module must exist in the daemon MCP source of truth before activation. Remote installation of an MCP config plus its binary is a Core package-manager task, not something the extension should bypass.
+
+### Host process
+
+```toml
+schema_version = 1
+id = "example-host"
+name = "Example Host"
+version = "0.1.0"
+description = "Crash-isolated external integration"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["tool"]
+permissions = ["process_spawn"]
+
+[entrypoint]
+kind = "host_process"
+command = "./bin/example-host"
+args = ["--stdio"]
+```
+
+The child must implement the public Impetus host JSON-RPC protocol. The implementation language is irrelevant.
+
+## Legacy manifests
+
+`package.toml` plus generated `manifest.json` (`impetus.extension.v1`) belong to the old Skill/MCP CLI install adapter. They remain in this repository only while `impetus-ext-support` depends on them.
+
+Do not use the legacy envelope as the design for new packages.

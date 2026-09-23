@@ -1,0 +1,13 @@
+schema_version = 1
+id = "lsp"
+name = "LSP"
+version = "0.1.0"
+description = "Generic external language-server bridge"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "lsp_integration"]
+permissions = ["mcp", "process_spawn", "filesystem_read", "lsp"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "lsp"

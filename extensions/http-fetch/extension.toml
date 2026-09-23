@@ -1,0 +1,13 @@
+schema_version = 1
+id = "http-fetch"
+name = "HTTP Fetch"
+version = "0.1.0"
+description = "Constrained HTTP access exposed through MCP"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "tool"]
+permissions = ["mcp", "process_spawn", "network"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "http-fetch"

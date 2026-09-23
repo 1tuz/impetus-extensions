@@ -1,0 +1,13 @@
+schema_version = 1
+id = "git-tools"
+name = "Git Tools"
+version = "0.1.0"
+description = "Read-only Git inspection tools exposed through MCP"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "tool"]
+permissions = ["mcp", "process_spawn", "git"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "git-tools"

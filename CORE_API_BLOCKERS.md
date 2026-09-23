@@ -1,93 +1,86 @@
 # Core API blockers
 
-Work items for the main [Impetus](https://github.com/1tuz/impetus) repository.
-This extensions repo uses **only** public install kinds (`skill`, `mcp_config`) and documented wire shapes.
-It does **not** copy private host code or patch the daemon.
+Only current blockers for the main [Impetus](https://github.com/1tuz/impetus) repository belong here. Historical `v0.1.2` blockers were removed after Core shipped the public Extension SDK/package host.
 
-Compatibility pin: Impetus git tag **`v0.1.2`**.
+## Shipped in Core
+
+These are no longer blockers:
+
+- public `impetus-extension-sdk` surface (git revision pin; not crates.io yet)
+- `impetus.extension_package.v1` / `extension.toml`
+- `instruction_pack`
+- `mcp_bridge`
+- `host_process`
+- extension API compatibility checks
+- package list/get/enable/disable/reload/operate IPC
+- durable disabled-package state
+- policy/permission gating at activation
+- isolated package failures
+- public Browser/LSP host operations (`browser/*`, `coding/*`)
+
+Do not reintroduce local copies of private `impetus-core` host code to solve extension problems.
+
+---
+----
+----
+----
+
+## 1. No remote catalog/install/update/remove in Core
+
+Current package discovery starts from local package directories. Core does not yet consume this repository's `catalog.json`, download GitHub release artifacts, or expose a complete remote package lifecycle.
+
+Needed for one-click CLI/Desktop UX:
+
+- refresh first-party catalog
+- list available vs installed versions
+- install a selected package
+- update one / update all
+- remove package
+- verify manifest, compatibility and content digest before activation
+- atomic install/rollback
+- cache the last good catalog for offline use
+
+This logic belongs in Core/daemon so CLI and Desktop share one implementation.
 
 ---
 
-## 1. No published Extension SDK / `extension_api_version`
+## 2. `mcp_bridge` packaging is not atomic yet
 
-| | |
-|--|--|
-| **Required API** | Stable crate (e.g. `impetus-extension-sdk`) + version constant `extension_api_version` negotiated at load time |
-| **Why** | External authors cannot depend on a crates.io/git SDK surface; only path/`impetus-core` exists and is not a plugin ABI |
-| **Minimal interface** | `EXTENSION_API_VERSION: &str`, `negotiate(client) -> Result<Compat>`, documented semver policy |
-| **Blocked / degraded** | All native providers; this repo uses stand-in `extension_api_version = "0.1.0-skill-mcp"` in `package.toml` / `compatibility.json` |
+`mcp_bridge` activates an MCP module that already exists under the daemon MCP source of truth. A downloadable package such as Browser/LSP currently needs both:
 
----
+1. its extension package under the extension package root; and
+2. the corresponding MCP module config/binary made available to the daemon.
 
-## 2. Install kinds limited to Skill + MCP config
-
-| | |
-|--|--|
-| **Required API** | Additional `ExtensionManifestKind` values (e.g. `native_module`, `browser_provider`, `coding_tools_provider`) with package install path |
-| **Why** | Browser/LSP implementations cannot be installed via `impetus extension install` as first-class providers |
-| **Minimal interface** | Kind + digest + capabilities + entrypoint path; lifecycle enable/disable identical to skill/mcp |
-| **Blocked / degraded** | `browser`, `lsp` ship as **MCP stand-ins**, not in-process provider registration |
+The future installer should install these artifacts as one transaction instead of requiring a manual copy step.
 
 ---
 
-## 3. No dynamic `BrowserProvider` registration
+## 3. Extension SDK is not published to crates.io
 
-| | |
-|--|--|
-| **Required API** | Load external provider (module IPC or dynamic library) implementing protocol `0.1` without recompiling `impetusd` |
-| **Why** | Core trait is in-process only; default production = absent provider |
-| **Minimal interface** | `BrowserService::register(Box<dyn BrowserProvider>)` from discovered module descriptor OR MCP→provider bridge in core |
-| **Blocked / degraded** | Official browser backend cannot plug into `OptionalBrowserService` / doctor browser probe without a core PR |
+`impetus-extension-sdk` is usable through an immutable Impetus git revision, but is still `publish = false`.
+
+This is not a runtime blocker, but publishing/tagging the SDK would simplify third-party authoring and reproducible builds.
 
 ---
 
-## 4. No dynamic `CodingToolsProvider` / LSP registration
+## 4. Generic host-process Tool/Command catalog wiring remains partial
 
-| | |
-|--|--|
-| **Required API** | Same as browser: discover + register external coding tools / LSP backend |
-| **Why** | `ProcessLspBackend` lives in core host wiring |
-| **Minimal interface** | Register `CodingToolsProvider` from package entrypoint |
-| **Blocked / degraded** | `lsp` extension is MCP proxy, not core coding-tools seam |
+Core can operate active `host_process` packages and has public Browser/LSP routes, but arbitrary extension Tool/Command capabilities are not yet a general AgentLoop tool catalog.
+
+Do not block Browser/LSP packaging on this when MCP already provides the required tool surface.
 
 ---
 
-## 5. No `MemoryProvider` trait
+## Repository migration work (not Core blockers)
 
-| | |
-|--|--|
-| **Required API** | `MemoryProvider` with store/recall/list scoped entries; must **not** auto-grant sandbox effects |
-| **Why** | Memory is daemon-owned (`MemoryStore` / session JSONL); no pluggable backend |
-| **Minimal interface** | `async fn remember/recall/list`; config for persistence root; capability token `memory.provider` |
-| **Blocked** | First-party memory extension **not shipped** (would duplicate session storage or require private hooks) |
+- Browser and LSP binaries currently speak MCP. Keep them as `mcp_bridge` packages until they intentionally adopt the Impetus host-process protocol.
+- Legacy `package.toml`, `manifest.json` generation, and `impetus-ext-support install-local` remain compatibility tooling and should be removed only after the new Core installer replaces them.
+- Do not create a second memory store in this repository. Core MemoryStore remains authoritative.
 
----
+## Non-goals
 
-## 6. ExtensionRuntime → AgentLoop skill inject incomplete
-
-| | |
-|--|--|
-| **Required API** | Enabled skills from ExtensionRuntime appear in AgentLoop instruction path |
-| **Why** | Install/list/doctor work; agent may not see skill content yet (Impetus TODO) |
-| **Minimal interface** | On session start, merge enabled skill bodies from install store into instruction resolver |
-| **Blocked / degraded** | `hello-extension` install path works; end-to-end “agent uses skill” may skip until core closes TODO |
-
----
-
-## 7. Dual MCP SoT (project `.impetus/mcp` vs `$IMPETUS_DATA_DIR/mcp`)
-
-| | |
-|--|--|
-| **Required API** | Single documented SoT or sync API CLI→daemon |
-| **Why** | `impetus extension install --kind mcp` writes project tree; daemon tools read data dir |
-| **Minimal interface** | `impetus extension publish-mcp --to-daemon` or daemon watches project install store |
-| **Blocked / degraded** | Dev loop needs `--daemon-mcp` copy step (`impetus-ext install-local`) |
-
----
-
-## Non-goals (do not “fix” in this repo)
-
-- Copying `impetus-core` private modules into extensions
-- Undocumented daemon IPC mutate for install
-- Requiring Chromium/Playwright/Node inside Impetus core
-- Shipping a fake memory extension that reimplements session event storage
+- copying `impetus-core` private modules into extensions
+- loading untrusted native code in-process with `dlopen`
+- putting Chromium/Playwright/language servers into the trusted Core
+- making Rust the extension ABI
+- implementing a second package manager in Desktop
