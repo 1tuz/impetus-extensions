@@ -1,9 +1,8 @@
 # Impetus Browser extension
 
-First-party MCP stdio server implementing **Browser Provider Protocol `0.1`**
+First-party **`mcp_bridge`** package (see `extension.toml`) implementing
+**Browser Provider Protocol `0.1`**
 (see Impetus `docs/reference/browser-provider-protocol.md`).
-
-Install kind: `mcp_config` (the only installable external path today).
 
 ## Quick start
 
@@ -22,16 +21,19 @@ cargo build -p impetus-ext-browser --features cdp --release
 BROWSER_BIN=/path/to/chromium impetus-ext-browser --cdp
 ```
 
-`BROWSER_BIN` is the only spawn allowlist. Documented as process.spawn-equivalent;
-MCP `env` / `env_keys` stay minimal — do not pass secrets.
+`BROWSER_BIN` is the only spawn allowlist. Declared as `process_spawn` in
+`extension.toml`; MCP `env` / `env_keys` stay minimal — do not pass secrets.
 
 ## Permissions
 
 | Permission | Why |
 | --- | --- |
-| `network` | Navigation / rendered fetch only |
+| `mcp` | MCP install surface |
+| `network` | Navigation / rendered fetch |
+| `process_spawn` | Optional allowlisted Chromium via `BROWSER_BIN` |
+| `browser` | Browser tool surface |
 
-**Not requested:** `filesystem.write`, secrets, arbitrary `process.shell`.
+**Not requested:** `filesystem_write`, `secrets_provider`, arbitrary shell.
 
 ## MCP tools
 

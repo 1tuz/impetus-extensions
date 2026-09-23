@@ -63,3 +63,5 @@ The language server remains replaceable and project-specific.
 The repository may contain Rust crates because some first-party packages need compiled binaries. That does not define the package format.
 
 `catalog.json` answers **what can be installed**. `extension.toml` answers **how Impetus activates one installed package**. A `SKILL.md`, `mcp.json`, or executable answers **what the package actually does**.
+
+Do not commit legacy `package.toml` under `extensions/` — that envelope is generated only under `dist/` for the old Skill/MCP CLI.

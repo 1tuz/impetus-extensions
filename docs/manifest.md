@@ -1,6 +1,9 @@
 # Manifest
 
-The canonical authoring manifest is `extension.toml` using the public `impetus.extension_package.v1` contract from `impetus-extension-sdk`.
+Canonical authoring manifest: **`extension.toml`**
+(`impetus.extension_package.v1`, public `impetus-extension-sdk`).
+
+There is no second plugin API and no competing package SoT under `extensions/`.
 
 ## Required fields
 
@@ -14,8 +17,8 @@ The canonical authoring manifest is `extension.toml` using the public `impetus.e
 | `author` | package author |
 | `extension_api_version` | API major; currently `1` |
 | `capabilities` | non-empty closed set from the SDK |
-| `permissions` | explicit, default-deny permission list |
-| `entrypoint` | one typed entrypoint |
+| `permissions` | explicit, default-deny list (may be empty) |
+| `entrypoint` | one of the three kinds below |
 
 ## Entrypoints
 
@@ -37,7 +40,7 @@ kind = "instruction_pack"
 root = "skills"
 ```
 
-The root is package-relative and must not contain absolute paths or `..`.
+`root` is package-relative and must not contain absolute paths or `..`.
 
 ### MCP bridge
 
@@ -57,7 +60,8 @@ kind = "mcp_bridge"
 module_id = "example-tools"
 ```
 
-The MCP module must exist in the daemon MCP source of truth before activation. Remote installation of an MCP config plus its binary is a Core package-manager task, not something the extension should bypass.
+The MCP module must exist in the daemon MCP source of truth before activation.
+Remote installation of config + binary is a Core package-manager task.
 
 ### Host process
 
@@ -78,10 +82,16 @@ command = "./bin/example-host"
 args = ["--stdio"]
 ```
 
-The child must implement the public Impetus host JSON-RPC protocol. The implementation language is irrelevant.
+Child implements the public Impetus host JSON-RPC protocol. Implementation
+language is irrelevant. **No** in-process `dlopen` ABI.
 
-## Legacy manifests
+## Legacy envelopes (dist only)
 
-`package.toml` plus generated `manifest.json` (`impetus.extension.v1`) belong to the old Skill/MCP CLI install adapter. They remain in this repository only while `impetus-ext-support` depends on them.
+`impetus-ext package` may emit under `dist/{id}-{version}/`:
 
-Do not use the legacy envelope as the design for new packages.
+- `extension.toml` (copy)
+- generated `package.toml` + `manifest.json` (`impetus.extension.v1`) for the
+  old Skill/MCP CLI install path
+
+Those generated files are **not** an authoring source of truth. Do not commit
+`package.toml` under `extensions/`.

@@ -1,0 +1,14 @@
+schema_version = 1
+id = "hello-host-process"
+name = "Hello Host Process"
+version = "0.1.0"
+description = "Minimal host_process example (stub stdio child)"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["tool"]
+permissions = ["process_spawn"]
+
+[entrypoint]
+kind = "host_process"
+command = "./ext.sh"
+args = ["--stdio"]

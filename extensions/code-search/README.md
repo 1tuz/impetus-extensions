@@ -11,7 +11,7 @@ Workspace-sandboxed text search over MCP. Tool: `search_text`.
 
 ## Permissions
 
-`filesystem.read` — read-only access under the workspace root.
+`filesystem_read` — read-only access under the workspace root (also declares `mcp`, `process_spawn` in `extension.toml`).
 
 ## Build / run
 

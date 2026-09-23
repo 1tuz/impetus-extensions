@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "id": "http-fetch",
   "name": "impetus-ext-http-fetch",
   "command": "impetus-ext-http-fetch",
   "args": [],
