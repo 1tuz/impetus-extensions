@@ -1,0 +1,13 @@
+schema_version = 1
+id = "code-search"
+name = "Code Search"
+version = "0.1.0"
+description = "Workspace-scoped code search exposed through MCP"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "tool"]
+permissions = ["mcp", "process_spawn", "filesystem_read"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "code-search"

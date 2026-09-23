@@ -1,0 +1,13 @@
+schema_version = 1
+id = "hello-extension"
+name = "Hello Extension"
+version = "0.1.0"
+description = "Portable reference instruction pack for Impetus extension authors"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["skill_provider"]
+permissions = []
+
+[entrypoint]
+kind = "instruction_pack"
+root = "skills"

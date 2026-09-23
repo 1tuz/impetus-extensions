@@ -1,0 +1,13 @@
+schema_version = 1
+id = "browser"
+name = "Browser"
+version = "0.1.0"
+description = "External browser automation capability; Rust MCP implementation with optional CDP backend"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "browser_integration"]
+permissions = ["mcp", "network", "process_spawn", "browser"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "browser"

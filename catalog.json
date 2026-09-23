@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/1tuz/impetus-extensions",
+  "extensions": [
+    {
+      "id": "hello-extension",
+      "name": "Hello Extension",
+      "version": "0.1.0",
+      "summary": "Portable reference instruction pack.",
+      "source_path": "extensions/hello-extension",
+      "entrypoint": "instruction_pack",
+      "portable_surface": "skill",
+      "implementation": "declarative",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
+      "id": "browser",
+      "name": "Browser",
+      "version": "0.1.0",
+      "summary": "External browser automation capability with optional CDP backend.",
+      "source_path": "extensions/browser",
+      "entrypoint": "mcp_bridge",
+      "portable_surface": "mcp",
+      "implementation": "rust",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
+      "id": "lsp",
+      "name": "LSP",
+      "version": "0.1.0",
+      "summary": "Generic external language-server bridge.",
+      "source_path": "extensions/lsp",
+      "entrypoint": "mcp_bridge",
+      "portable_surface": "mcp",
+      "implementation": "rust",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
+      "id": "git-tools",
+      "name": "Git Tools",
+      "version": "0.1.0",
+      "summary": "Read-only Git inspection tools.",
+      "source_path": "extensions/git-tools",
+      "entrypoint": "mcp_bridge",
+      "portable_surface": "mcp",
+      "implementation": "rust",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
+      "id": "code-search",
+      "name": "Code Search",
+      "version": "0.1.0",
+      "summary": "Workspace-scoped text search.",
+      "source_path": "extensions/code-search",
+      "entrypoint": "mcp_bridge",
+      "portable_surface": "mcp",
+      "implementation": "rust",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
+      "id": "http-fetch",
+      "name": "HTTP Fetch",
+      "version": "0.1.0",
+      "summary": "Constrained HTTP access over MCP.",
+      "source_path": "extensions/http-fetch",
+      "entrypoint": "mcp_bridge",
+      "portable_surface": "mcp",
+      "implementation": "rust",
+      "distribution": { "kind": "repository_source" }
+    }
+  ]
+}
