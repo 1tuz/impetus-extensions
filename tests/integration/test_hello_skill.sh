@@ -17,7 +17,7 @@ ensure_python
 assert_compat_tag
 
 EXT="${REPO_ROOT}/extensions/hello-extension"
-[[ -f "${EXT}/package.toml" && -f "${EXT}/SKILL.md" ]] \
+[[ -f "${EXT}/extension.toml" && -f "${EXT}/skills/SKILL.md" ]] \
   || fail "missing hello-extension sources under ${EXT}"
 
 OUT="$(mktemp -d "${TMPDIR:-/tmp}/hello-pkg.XXXXXX")"

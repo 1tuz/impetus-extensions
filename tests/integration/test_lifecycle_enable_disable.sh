@@ -17,7 +17,7 @@ assert_compat_tag
 require_impetus_or_skip
 
 EXT="${REPO_ROOT}/extensions/hello-extension"
-[[ -f "${EXT}/package.toml" ]] || fail "missing ${EXT}/package.toml"
+[[ -f "${EXT}/extension.toml" ]] || fail "missing ${EXT}/extension.toml"
 
 OUT="$(mktemp -d "${TMPDIR:-/tmp}/life-pkg.XXXXXX")"
 PROJECT="$(make_temp_project)"
@@ -64,7 +64,7 @@ echo "${ST}" | grep -qi 'enabled' || fail "expected Enabled status, got ${ST}"
 
 # --- optional MCP install + daemon SoT ---
 BROWSER_EXT="${REPO_ROOT}/extensions/browser"
-if [[ -f "${BROWSER_EXT}/mcp.json" && -f "${BROWSER_EXT}/package.toml" ]]; then
+if [[ -f "${BROWSER_EXT}/mcp.json" && -f "${BROWSER_EXT}/extension.toml" ]]; then
   info "optional: install browser MCP config via public CLI"
   B_LAYOUT="$(package_extension "${BROWSER_EXT}" "${OUT}")"
   MCP_SRC="${B_LAYOUT}/mcp.json"

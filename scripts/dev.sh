@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Developer one-shot: build, test, validate manifests, package all extensions.
+# Developer one-shot: build, test, validate manifests/catalog, package all extensions.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -14,7 +14,10 @@ cargo test --workspace --all-targets
 echo "==> validate-manifests"
 cargo run -p impetus-ext-support -- validate-manifests --root "$ROOT"
 
-echo "==> check-compat (compatibility.json / extension_api)"
+echo "==> validate-catalog"
+cargo run -p impetus-ext-support -- validate-catalog --root "$ROOT"
+
+echo "==> check-compat"
 cargo run -p impetus-ext-support -- check-compat --root "$ROOT"
 
 echo "==> package-all -> dist/"

@@ -108,17 +108,31 @@ fn parse_args_json_and_whitespace() {
 }
 
 #[test]
-fn package_meta_and_mcp_json_shape() {
+fn extension_manifest_and_mcp_json_shape() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let meta =
-        impetus_ext_support::load_package_meta(&root.join("package.toml")).expect("package.toml");
-    assert_eq!(meta.id, "lsp");
-    assert_eq!(meta.compatibility.impetus_tag, "v0.1.2");
-    assert_eq!(meta.compatibility.extension_api_version, "0.1.0-skill-mcp");
-    assert!(!meta.permissions.contains(&"network".to_string()));
-    assert!(!meta.permissions.contains(&"secrets_provider".to_string()));
-    assert!(meta.permissions.contains(&"process_spawn".to_string()));
-    assert!(meta.permissions.contains(&"filesystem_read".to_string()));
+    let manifest = impetus_ext_support::load_extension_dir(&root).expect("extension.toml");
+    assert_eq!(manifest.id.as_str(), "lsp");
+    assert_eq!(manifest.extension_api_version, 1);
+    assert!(
+        !manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::Network)
+    );
+    assert!(
+        !manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::SecretsProvider)
+    );
+    assert!(
+        manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::ProcessSpawn)
+    );
+    assert!(
+        manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::FilesystemRead)
+    );
 
     let mcp: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(root.join("mcp.json")).unwrap()).unwrap();

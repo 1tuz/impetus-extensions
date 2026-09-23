@@ -1,24 +1,36 @@
 {
-  "impetus_tag": "v0.1.2",
-  "impetus_repository": "https://github.com/1tuz/impetus",
-  "extension_api_version": "0.1.0-skill-mcp",
-  "extension_api_version_note": "Legacy compatibility fields retained for impetus-ext-support. New packages use impetus.extension_package.v1 with extension_api_version major 1.",
-  "schemas": {
-    "extension": "impetus.extension.v1@1",
-    "mcp": "impetus.mcp.v1@1",
-    "browser_provider_protocol": "0.1"
+  "sdk": {
+    "crate": "impetus-extension-sdk",
+    "repository": "https://github.com/1tuz/impetus",
+    "rev": "7dc456a0062fd61c9d47d1abe2fed76fec56a12c",
+    "distribution": "immutable git revision until crates.io publish"
   },
-  "supported_install_kinds": ["skill", "mcp_config"],
   "canonical_package_contract": {
     "schema": "impetus.extension_package.v1",
     "extension_api_version": 1,
     "entrypoints": ["instruction_pack", "mcp_bridge", "host_process"],
-    "sdk": "impetus-extension-sdk",
-    "sdk_distribution": "immutable git revision until published"
+    "permissions_vocabulary": [
+      "filesystem_read",
+      "filesystem_write",
+      "network",
+      "process_spawn",
+      "pty",
+      "git",
+      "mcp",
+      "browser",
+      "lsp",
+      "memory",
+      "secrets_provider"
+    ]
   },
   "legacy_helper": {
     "status": "compatibility_only",
+    "note": "impetus-ext-support package/install-local generate impetus.extension.v1 envelopes from extension.toml for the old Skill/MCP CLI. Not a second authoring SoT.",
     "impetus_tag": "v0.1.2",
-    "schema": "impetus.extension.v1@1"
-  }
+    "schema": "impetus.extension.v1@1",
+    "mcp_schema": "impetus.mcp.v1@1"
+  },
+  "impetus_tag": "v0.1.2",
+  "impetus_repository": "https://github.com/1tuz/impetus",
+  "extension_api_version_note": "New packages use extension_api_version = 1 in extension.toml. Legacy string 0.1.0-skill-mcp appears only in generated dist/package.toml."
 }

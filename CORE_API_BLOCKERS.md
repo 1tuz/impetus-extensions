@@ -1,29 +1,23 @@
 # Core API blockers
 
-Only current blockers for the main [Impetus](https://github.com/1tuz/impetus) repository belong here. Historical `v0.1.2` blockers were removed after Core shipped the public Extension SDK/package host.
+Only **current** blockers for the main [Impetus](https://github.com/1tuz/impetus) repository belong here.
 
-## Shipped in Core
+## Shipped in Core (not blockers)
 
-These are no longer blockers:
-
-- public `impetus-extension-sdk` surface (git revision pin; not crates.io yet)
+- public `impetus-extension-sdk` (git revision pin; `publish = false`)
 - `impetus.extension_package.v1` / `extension.toml`
-- `instruction_pack`
-- `mcp_bridge`
-- `host_process`
-- extension API compatibility checks
+- entrypoints: `instruction_pack`, `mcp_bridge`, `host_process`
+- extension API compatibility checks (`extension_api_version` major)
 - package list/get/enable/disable/reload/operate IPC
 - durable disabled-package state
 - policy/permission gating at activation
-- isolated package failures
-- public Browser/LSP host operations (`browser/*`, `coding/*`)
+- isolated package failures (crash of a package must not take down `impetusd`)
+- public Browser/LSP host operations (`browser/*`, `coding/*`) when an Active `host_process` is present
 
-Do not reintroduce local copies of private `impetus-core` host code to solve extension problems.
+Do not reintroduce local copies of private `impetus-core` host code.
+Do not invent a public `native_module` / in-process ABI for third-party extensions.
 
 ---
-----
-----
-----
 
 ## 1. No remote catalog/install/update/remove in Core
 
@@ -33,9 +27,7 @@ Needed for one-click CLI/Desktop UX:
 
 - refresh first-party catalog
 - list available vs installed versions
-- install a selected package
-- update one / update all
-- remove package
+- install / update / remove package
 - verify manifest, compatibility and content digest before activation
 - atomic install/rollback
 - cache the last good catalog for offline use
@@ -57,9 +49,9 @@ The future installer should install these artifacts as one transaction instead o
 
 ## 3. Extension SDK is not published to crates.io
 
-`impetus-extension-sdk` is usable through an immutable Impetus git revision, but is still `publish = false`.
+`impetus-extension-sdk` is usable through an immutable Impetus git revision (see `compatibility.json` → `sdk.rev`), but is still `publish = false`.
 
-This is not a runtime blocker, but publishing/tagging the SDK would simplify third-party authoring and reproducible builds.
+Not a runtime blocker; publishing/tagging would simplify third-party authoring.
 
 ---
 
@@ -71,11 +63,11 @@ Do not block Browser/LSP packaging on this when MCP already provides the require
 
 ---
 
-## Repository migration work (not Core blockers)
+## Repository notes (not Core blockers)
 
-- Browser and LSP binaries currently speak MCP. Keep them as `mcp_bridge` packages until they intentionally adopt the Impetus host-process protocol.
-- Legacy `package.toml`, `manifest.json` generation, and `impetus-ext-support install-local` remain compatibility tooling and should be removed only after the new Core installer replaces them.
-- Do not create a second memory store in this repository. Core MemoryStore remains authoritative.
+- Browser and LSP binaries currently speak MCP → keep as `mcp_bridge` until they intentionally adopt the Impetus host-process protocol.
+- `impetus-ext-support package` / `install-local` generate legacy Skill/MCP envelopes from `extension.toml` for the old CLI only. Authoring SoT is always `extension.toml`.
+- Do not create a second memory store here. Core MemoryStore remains authoritative.
 
 ## Non-goals
 
@@ -84,3 +76,4 @@ Do not block Browser/LSP packaging on this when MCP already provides the require
 - putting Chromium/Playwright/language servers into the trusted Core
 - making Rust the extension ABI
 - implementing a second package manager in Desktop
+- a public `native_module` entrypoint

@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "id": "code-search",
   "name": "impetus-ext-code-search",
   "command": "impetus-ext-code-search",
   "args": [],

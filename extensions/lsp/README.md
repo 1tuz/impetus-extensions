@@ -2,7 +2,7 @@
 
 Generic **language-server** MCP extension for Impetus. Spawns a configurable LS over stdio (Content-Length framed JSON-RPC) and exposes MCP tools. Not Rust-only — `presets/rust-analyzer.json` is a reference config.
 
-**Compat:** Impetus `v0.1.2`, extension API stand-in `0.1.0-skill-mcp`.
+**Entrypoint:** `mcp_bridge` via `extension.toml`. **Compat:** extension API major `1` (SDK pin in repo `compatibility.json`).
 
 ## Install
 

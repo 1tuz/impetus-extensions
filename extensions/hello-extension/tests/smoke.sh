@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Smoke: SKILL.md frontmatter + package.toml shape. No impetus binary required.
+# Smoke: skills/SKILL.md frontmatter + extension.toml shape. No impetus binary required.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SKILL="$ROOT/SKILL.md"
-PKG="$ROOT/package.toml"
+SKILL="$ROOT/skills/SKILL.md"
+MANIFEST="$ROOT/extension.toml"
 fail=0
 
 need() {
@@ -15,8 +15,9 @@ need() {
   fi
 }
 
-[[ -f "$SKILL" ]] || { echo "missing SKILL.md"; exit 1; }
-[[ -f "$PKG" ]] || { echo "missing package.toml"; exit 1; }
+[[ -f "$SKILL" ]] || { echo "missing skills/SKILL.md"; exit 1; }
+[[ -f "$MANIFEST" ]] || { echo "missing extension.toml"; exit 1; }
+[[ ! -f "$ROOT/package.toml" ]] || { echo "legacy package.toml must not exist in sources"; exit 1; }
 
 # YAML frontmatter delimiters
 first="$(head -n1 "$SKILL")"
@@ -24,25 +25,22 @@ first="$(head -n1 "$SKILL")"
 awk 'NR>1 && /^---$/{found=1; exit} END{exit !found}' "$SKILL" \
   || { echo "SKILL.md: missing closing ---"; fail=1; }
 
-need "$SKILL" '^name:[[:space:]]*hello-extension'
+need "$SKILL" '^id:[[:space:]]*hello-extension'
 need "$SKILL" '^description:'
 need "$SKILL" '^version:[[:space:]]*"?0\.1\.0"?'
 
-need "$PKG" '^id = "hello-extension"'
-need "$PKG" '^version = "0.1.0"'
-need "$PKG" '^kind = "skill"'
-need "$PKG" '^permissions = \[\]'
-need "$PKG" 'extension_api_version = "0.1.0-skill-mcp"'
-need "$PKG" 'impetus_tag = "v0.1.2"'
-need "$PKG" 'extension_schema = "impetus.extension.v1@1"'
-need "$PKG" 'mcp_schema = "impetus.mcp.v1@1"'
+need "$MANIFEST" '^id = "hello-extension"'
+need "$MANIFEST" '^version = "0.1.0"'
+need "$MANIFEST" 'kind = "instruction_pack"'
+need "$MANIFEST" '^permissions = \[\]'
+need "$MANIFEST" 'extension_api_version = 1'
 
 if [[ "$fail" -ne 0 ]]; then
   echo "smoke: FAIL"
   exit 1
 fi
 
-# Packaging + impetus.extension.v1 validation (cargo / support crate; no impetus CLI)
+# Packaging + validation (cargo / support crate; no impetus CLI)
 REPO="$(cd "$ROOT/../.." && pwd)"
 cd "$REPO"
 cargo test -p impetus-ext-support package_hello_extension_from_repo

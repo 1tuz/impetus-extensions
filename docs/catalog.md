@@ -1,34 +1,30 @@
 # Catalog
 
-`catalog.json` is publisher metadata for first-party extension discovery. It is intentionally separate from `extension.toml`.
+`catalog.json` is publisher discovery metadata. **`extension.toml` remains
+authoritative** for id, name, version, entrypoint, capabilities, and permissions.
 
-- `extension.toml` is runtime metadata consumed by the Impetus Extension Host.
-- `catalog.json` is discovery/distribution metadata consumed by a future Core Extension Manager.
+- Discovery fields in the catalog (`id`, `name`, `version`, `entrypoint`,
+  `source_path`, `portable_surface`) must match the canonical manifest.
+- The catalog must not grant permissions or override package manifests.
+- CI runs `impetus-ext validate-catalog` (also invoked from `validate-manifests`).
 
-The catalog must not grant permissions or override package manifests. The installed package manifest remains authoritative for compatibility and permission checks.
+## Sync from manifests
+
+```bash
+cargo run -p impetus-ext-support -- sync-catalog --root . --write
+```
+
+Keeps `summary` / `implementation` / `distribution` when already present;
+rewrites id/name/version/entrypoint/portable_surface/source_path from
+`extension.toml`.
 
 ## Current state
 
-The catalog currently points to source directories in this repository. Core does not yet fetch it automatically.
+Catalog points at source directories in this repository. Core does not yet
+fetch it automatically — see [CORE_API_BLOCKERS.md](../CORE_API_BLOCKERS.md).
 
 ## Target state
 
-A release pipeline can later replace `repository_source` distribution entries with immutable GitHub release artifacts containing:
-
-- `extension.toml`
-- required skills/config
-- target-specific binaries where needed
-- content digest/checksum metadata
-
-Core should download to a staging directory, validate compatibility/permissions/digest, and atomically promote the package only after validation.
-
-Desktop and CLI should both ask Core for catalog state; neither client should download packages independently.
-
-## Refresh policy
-
-Recommended client behavior:
-
-- show cached catalog immediately;
-- refresh catalog asynchronously on open/start;
-- expose an explicit Refresh action;
-- do not automatically update installed extensions when a new package version or new permissions appear.
+Release pipeline later replaces `repository_source` with immutable GitHub
+release artifacts containing `extension.toml`, skills/config, binaries, and
+digests. Desktop and CLI ask Core for catalog state; neither downloads alone.

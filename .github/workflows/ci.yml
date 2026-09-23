@@ -75,8 +75,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.98.0
       - uses: Swatinem/rust-cache@v2
-      - name: validate-manifests
+      - name: validate-manifests (extension.toml + catalog)
         run: cargo run -p impetus-ext-support -- validate-manifests --root .
+      - name: validate-catalog
+        run: cargo run -p impetus-ext-support -- validate-catalog --root .
+      - name: reject legacy package.toml in sources
+        run: |
+          set -euo pipefail
+          if find extensions -name package.toml -type f | grep -q .; then
+            echo "legacy package.toml must not exist under extensions/" >&2
+            find extensions -name package.toml -type f >&2
+            exit 1
+          fi
+          echo "no legacy package.toml in sources"
 
   compat:
     name: compat
@@ -86,19 +97,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.98.0
       - uses: Swatinem/rust-cache@v2
-      - name: Assert compatibility.json extension_api pin
+      - name: Assert compatibility.json SDK + canonical contract
         run: |
           set -euo pipefail
           test -f compatibility.json
           jq -e '
-            .impetus_tag
-            and .extension_api_version
-            and .schemas.extension
-            and .schemas.mcp
+            .sdk.rev
+            and .canonical_package_contract.schema
+            and .canonical_package_contract.extension_api_version
+            and (.canonical_package_contract.entrypoints | index("instruction_pack"))
+            and (.canonical_package_contract.entrypoints | index("mcp_bridge"))
+            and (.canonical_package_contract.entrypoints | index("host_process"))
+            and ((.canonical_package_contract.entrypoints | index("native_module")) | not)
+            and .legacy_helper.impetus_tag
           ' compatibility.json > /dev/null
           echo "compatibility.json OK:"
-          jq '{impetus_tag, extension_api_version, schemas}' compatibility.json
-      - name: check-compat (extension_api via compatibility.json)
+          jq '{sdk, canonical_package_contract, legacy_helper}' compatibility.json
+      - name: check-compat
         run: cargo run -p impetus-ext-support -- check-compat --root .
 
   security:

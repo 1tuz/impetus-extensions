@@ -44,6 +44,9 @@ reqwest = { version = "0.12.23", default-features = false, features = ["rustls-t
 impetus-ext-support = { path = "crates/impetus-ext-support" }
 impetus-ext-mcp = { path = "crates/impetus-ext-mcp" }
 
+# Public Extension SDK from Impetus (not crates.io yet — pin immutable rev).
+impetus-extension-sdk = { git = "https://github.com/1tuz/impetus", rev = "7dc456a0062fd61c9d47d1abe2fed76fec56a12c", package = "impetus-extension-sdk" }
+
 [profile.release]
 lto = true
 codegen-units = 1

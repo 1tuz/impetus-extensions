@@ -1,0 +1,4 @@
+# Local co-development: prefer sibling Impetus checkout for the SDK.
+# CI / clean clones still use the immutable git rev from workspace Cargo.toml.
+[patch."https://github.com/1tuz/impetus"]
+impetus-extension-sdk = { path = "../impetus/crates/impetus-extension-sdk" }

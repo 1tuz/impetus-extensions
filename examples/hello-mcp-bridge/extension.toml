@@ -1,0 +1,13 @@
+schema_version = 1
+id = "hello-mcp-bridge"
+name = "Hello MCP Bridge"
+version = "0.1.0"
+description = "Minimal mcp_bridge example"
+author = "Impetus Contributors"
+extension_api_version = 1
+capabilities = ["mcp_integration", "tool"]
+permissions = ["mcp"]
+
+[entrypoint]
+kind = "mcp_bridge"
+module_id = "hello-mcp-bridge"

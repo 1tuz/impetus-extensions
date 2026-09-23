@@ -167,14 +167,27 @@ async fn reject_incompatible_protocol_major() {
 }
 
 #[test]
-fn package_meta_loads() {
+fn extension_manifest_loads() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
-    let meta = impetus_ext_support::load_package_meta(&root.join("package.toml")).unwrap();
-    assert_eq!(meta.id, "browser");
-    assert_eq!(meta.kind, impetus_ext_support::PackageKind::McpConfig);
-    assert_eq!(meta.compatibility.browser_protocol.as_deref(), Some("0.1"));
-    assert!(meta.permissions.iter().any(|p| p == "network"));
-    assert!(!meta.permissions.iter().any(|p| p.contains("filesystem")));
-    assert!(!meta.permissions.iter().any(|p| p.contains("secret")));
-    assert!(!meta.permissions.iter().any(|p| p.contains("shell")));
+    let manifest = impetus_ext_support::load_extension_dir(root).unwrap();
+    assert_eq!(manifest.id.as_str(), "browser");
+    assert!(matches!(
+        manifest.entrypoint,
+        impetus_ext_support::ExtensionEntrypoint::McpBridge { .. }
+    ));
+    assert!(
+        manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::Network)
+    );
+    assert!(
+        !manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::FilesystemRead)
+    );
+    assert!(
+        !manifest
+            .permissions
+            .contains(&impetus_ext_support::ExtensionPermission::SecretsProvider)
+    );
 }

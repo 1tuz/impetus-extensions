@@ -1,4 +1,6 @@
 {
+  "schema_version": 1,
+  "id": "git-tools",
   "name": "impetus-ext-git-tools",
   "command": "impetus-ext-git-tools",
   "args": [],
