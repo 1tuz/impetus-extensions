@@ -9,6 +9,7 @@ Only **current** blockers for the main [Impetus](https://github.com/1tuz/impetus
 - entrypoints: `instruction_pack`, `mcp_bridge`, `host_process`
 - extension API compatibility checks (`extension_api_version` major)
 - package list/get/enable/disable/reload/operate IPC
+- package **Install/Remove** IPC + CLI `impetus extension install package` / `remove --package` (#447)
 - durable disabled-package state
 - policy/permission gating at activation
 - isolated package failures (crash of a package must not take down `impetusd`)
@@ -19,17 +20,18 @@ Do not invent a public `native_module` / in-process ABI for third-party extensio
 
 ---
 
-## 1. No remote catalog/install/update/remove in Core
+## 1. No remote catalog fetch / marketplace in Core
 
-Current package discovery starts from local package directories. Core does not yet consume this repository's `catalog.json`, download GitHub release artifacts, or expose a complete remote package lifecycle.
+Local package Install/Remove from a directory is shipped (#447). Core still does
+**not** fetch this repository's `catalog.json`, download GitHub release
+artifacts, or expose a marketplace-style remote lifecycle.
 
 Needed for one-click CLI/Desktop UX:
 
 - refresh first-party catalog
 - list available vs installed versions
-- install / update / remove package
-- verify manifest, compatibility and content digest before activation
-- atomic install/rollback
+- remote install / update (artifact + digest)
+- atomic install/rollback for remote artifacts
 - cache the last good catalog for offline use
 
 This logic belongs in Core/daemon so CLI and Desktop share one implementation.

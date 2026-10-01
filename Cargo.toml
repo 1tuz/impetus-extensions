@@ -45,7 +45,7 @@ impetus-ext-support = { path = "crates/impetus-ext-support" }
 impetus-ext-mcp = { path = "crates/impetus-ext-mcp" }
 
 # Public Extension SDK from Impetus (not crates.io yet — pin immutable rev).
-impetus-extension-sdk = { git = "https://github.com/1tuz/impetus", rev = "7dc456a0062fd61c9d47d1abe2fed76fec56a12c", package = "impetus-extension-sdk" }
+impetus-extension-sdk = { git = "https://github.com/1tuz/impetus", rev = "b659255bac427acc0436fb6b1496cf0de7eb6c1b", package = "impetus-extension-sdk" }
 
 [profile.release]
 lto = true

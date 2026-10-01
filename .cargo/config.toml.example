@@ -1,0 +1,9 @@
+# Optional local co-development override.
+# Copy to config.toml (gitignored) when Impetus is checked out as a sibling:
+#
+#   cp .cargo/config.toml.example .cargo/config.toml
+#
+# CI and clean clones must use the immutable git `rev` from workspace Cargo.toml.
+
+[patch."https://github.com/1tuz/impetus"]
+impetus-extension-sdk = { path = "../impetus/crates/impetus-extension-sdk" }

@@ -14,11 +14,17 @@ Repo-local follow-ups. Core gaps stay in [CORE_API_BLOCKERS.md](CORE_API_BLOCKER
 
 ## Next
 
-- [ ] When Core remote installer lands: drop legacy `package` / `install-local` Skill/MCP path or quarantine under `legacy/`
+- [ ] When Core remote catalog fetch lands: drop legacy `package` / `install-local` Skill/MCP path or quarantine under `legacy/`
 - [ ] Publish prebuilt Browser/LSP release archives + switch catalog `distribution` off `repository_source`
 - [ ] Optional: migrate Browser/LSP binaries from MCP stdio to Impetus `host_process` protocol (keep `mcp_bridge` until then)
-- [ ] Bump `sdk.rev` when Impetus cuts a tagged SDK-bearing release
+- [ ] Bump `sdk.rev` when Impetus cuts a tagged SDK-bearing release (or crates.io version)
 - [ ] crates.io publish of `impetus-extension-sdk` (tracked as Core blocker #3)
+
+## Done (contract demo packs / SDK pin)
+
+- [x] `sdk.rev` pin to Impetus rev with SDK + package Install/Remove IPC (#447)
+- [x] Catalog covers `instruction_pack` + `mcp_bridge` + `host_process` installable demos
+- [x] Manifests validated via git-pinned `impetus-extension-sdk`
 
 ## Non-goals
 

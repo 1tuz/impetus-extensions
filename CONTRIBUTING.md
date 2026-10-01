@@ -7,6 +7,9 @@ This repo ships first-party Impetus extensions. Keep changes narrow.
 1. Canonical manifest is **`extension.toml`** (`impetus.extension_package.v1`).
 2. Only three entrypoints: `instruction_pack` | `mcp_bridge` | `host_process`.
 3. Pin `impetus-extension-sdk` via immutable git `rev` (`compatibility.json` → `sdk.rev`).
+   Local co-dev may copy `.cargo/config.toml.example` → `.cargo/config.toml`
+   (gitignored) for a sibling Impetus path patch. Do **not** commit that file —
+   CI must resolve the git pin.
 4. Do not depend on Impetus private modules or copy core internals here.
 5. Do not add `package.toml` under `extensions/` (legacy envelopes are generated into `dist/` only).
 6. No public `native_module` / in-process native ABI for third-party packs.

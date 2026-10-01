@@ -2,7 +2,8 @@
   "sdk": {
     "crate": "impetus-extension-sdk",
     "repository": "https://github.com/1tuz/impetus",
-    "rev": "7dc456a0062fd61c9d47d1abe2fed76fec56a12c",
+    "rev": "b659255bac427acc0436fb6b1496cf0de7eb6c1b",
+    "note": "Impetus origin/main pin with SDK + package Install/Remove IPC (#447) and crates.io dry-run prep (#449). Bump when Core ships a newer SDK-bearing rev.",
     "distribution": "immutable git revision until crates.io publish"
   },
   "canonical_package_contract": {
