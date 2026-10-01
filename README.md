@@ -36,11 +36,30 @@ Authoring flow: [docs/creating-extension.md](docs/creating-extension.md).
 | Id | Entrypoint | Implementation | Notes |
 |---|---|---|---|
 | `hello-extension` | `instruction_pack` | declarative | Tutorial / reference skill |
+| `hello-host-process` | `host_process` | shell JSON-RPC | Installable echo demo (`op=echo`) |
 | `browser` | `mcp_bridge` | Rust MCP server | Optional CDP backend; may move to `host_process` later |
 | `lsp` | `mcp_bridge` | Rust MCP server | Language servers remain external |
 | `git-tools` | `mcp_bridge` | Rust MCP server | Read-only git tools |
 | `code-search` | `mcp_bridge` | Rust MCP server | Workspace-scoped search |
 | `http-fetch` | `mcp_bridge` | Rust MCP server | Constrained HTTP access |
+
+### Demo install path (all three entrypoints)
+
+Catalog covers installable demos for each contract entrypoint. With Impetus
+CLI/daemon that includes package Install IPC (#447+):
+
+```bash
+# instruction_pack
+impetus extension install package extensions/hello-extension
+# mcp_bridge (any of the MCP packs; git-tools is a small read-only demo)
+impetus extension install package extensions/git-tools
+# host_process
+impetus extension install package extensions/hello-host-process
+```
+
+Then List / Enable via IPC or CLI, and for `hello-host-process` operate
+`op=echo`. Thin copy-paste stubs also live under [`examples/`](examples/).
+Contract: [EXTENSION_REPOSITORY_CONTRACT.md](https://github.com/1tuz/impetus/blob/main/EXTENSION_REPOSITORY_CONTRACT.md).
 
 ## Catalog
 
@@ -59,7 +78,9 @@ cargo run -p impetus-ext-support -- check-compat --root .
 
 Declarative packs need only `extension.toml` + skills. Rust is required for MCP/host binaries and helper crates.
 
-SDK: `impetus-extension-sdk` pinned in [compatibility.json](compatibility.json) (`sdk.rev`). Not on crates.io yet.
+SDK: `impetus-extension-sdk` pinned in [compatibility.json](compatibility.json)
+(`sdk.rev` = Impetus git SHA with SDK + Install/Remove IPC). Not on crates.io yet
+— see [depending-on-sdk.md](https://github.com/1tuz/impetus/blob/main/docs/extensions/depending-on-sdk.md).
 
 Legacy Skill/MCP CLI packaging (`impetus-ext package` / `install-local`) **generates** envelopes under `dist/` from `extension.toml`. Do not commit `package.toml` under `extensions/`.
 

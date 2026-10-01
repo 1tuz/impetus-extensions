@@ -14,6 +14,17 @@
       "distribution": { "kind": "repository_source" }
     },
     {
+      "id": "hello-host-process",
+      "name": "Hello Host Process",
+      "version": "0.1.0",
+      "summary": "Installable host_process demo (echo operate JSON-RPC).",
+      "source_path": "extensions/hello-host-process",
+      "entrypoint": "host_process",
+      "portable_surface": "host_process",
+      "implementation": "shell",
+      "distribution": { "kind": "repository_source" }
+    },
+    {
       "id": "browser",
       "name": "Browser",
       "version": "0.1.0",

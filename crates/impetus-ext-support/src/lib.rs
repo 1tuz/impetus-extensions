@@ -27,7 +27,7 @@ pub const BROWSER_PROVIDER_PROTOCOL_VERSION: &str = "0.1";
 /// Supported Impetus release tag for the legacy CLI install helper.
 pub const SUPPORTED_IMPETUS_TAG: &str = "v0.1.2";
 /// Immutable Impetus git rev that provides `impetus-extension-sdk`.
-pub const SDK_GIT_REV: &str = "7dc456a0062fd61c9d47d1abe2fed76fec56a12c";
+pub const SDK_GIT_REV: &str = "b659255bac427acc0436fb6b1496cf0de7eb6c1b";
 /// Canonical package schema id (matches SDK).
 pub const PACKAGE_SCHEMA_ID: &str = "impetus.extension_package.v1";
 

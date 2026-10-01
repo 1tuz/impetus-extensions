@@ -25,3 +25,6 @@
 
 # Packaged binaries accidentally copied into extension sources
 extensions/*/bin/
+
+# Local SDK path patch (see config.toml.example)
+.cargo/config.toml
